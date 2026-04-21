@@ -1,0 +1,63 @@
+clc;
+clear;
+
+% Parameters
+fs = 1000; % Sampling frequency (Hz)
+T = 1/fs; % Sampling period (s)
+time = 0:T:1; % Simulation time (1 second)
+f_pwm = 50; % PWM frequency (Hz)
+duty_cycle = 50; % Initial Duty cycle (percentage)
+% Generate PWM signal
+pwm_signal = square(2 * pi * f_pwm * time, duty_cycle);
+% Plot PWM signal
+figure;
+subplot(3,1,1);
+plot(time, pwm_signal, 'LineWidth', 1.5);
+ylim([-1.5, 1.5]);
+title('PWM Signal');
+xlabel('Time (s)');
+ylabel('Amplitude');
+grid on;
+
+% Simulate motor speed based on duty cycle
+speed = (duty_cycle / 100) * 3000; % Assuming max speed = 3000 RPM
+motor_speed = speed * ones(size(time)); % Constant speed for this duty cycle
+% Plot motor speed
+subplot(3,1,2);
+plot(time, motor_speed, 'r', 'LineWidth', 1.5);
+title('DC Motor Speed');
+xlabel('Time (s)');
+
+2 | P a g e
+
+ylabel('Speed (RPM)');
+grid on;
+
+% Vary the duty cycle over time
+new_duty_cycle = linspace(0, 100, length(time)); % Duty cycle varies from 0 to
+100%
+
+% Generate variable PWM signal and motor speed
+variable_pwm_signal = zeros(1, length(time));
+variable_speed = zeros(1, length(time));
+for i = 1:length(time)
+variable_pwm_signal(i) = square(2 * pi * f_pwm * time(i),
+new_duty_cycle(i)); % PWM signal at each time point
+variable_speed(i) = (new_duty_cycle(i) / 100) * 3000; % Speed at each time
+point
+end
+
+% Plot variable PWM signal and motor speed
+subplot(3,1,3);
+yyaxis left
+plot(time, variable_pwm_signal, 'r', 'LineWidth', 1.5);
+ylabel('PWM Signal');
+ylim([-1.5, 1.5]);
+
+yyaxis right
+plot(time, variable_speed, 'b', 'LineWidth', 1.5);
+ylabel('Speed (RPM)');
+
+title('Variable PWM Signal and Motor Speed');
+xlabel('Time (s)');
+grid on;
