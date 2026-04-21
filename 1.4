@@ -1,0 +1,65 @@
+clc;
+clear;
+close all;
+
+%% Sampling
+fs = 100000;
+t = 0:1/fs:0.02;
+N = length(t);
+
+%% Message & Carrier
+fm = 100;
+fc = 1000;
+m = sin(2*pi*fm*t);
+c = cos(2*pi*fc*t);
+
+%% DSB-SC
+dsbsc = m .* c;
+
+%% VSB (Partial Sideband using Bandpass Filter)
+[bv,av] = butter(4,[fc-200 fc+200]/(fs/2),'bandpass');
+vsb_sig = filter(bv,av,dsbsc);
+
+%% Coherent Demodulation
+demod = vsb_sig .* c;
+[bl,al] = butter(4,(2*fm)/fs);
+demod = filter(bl,al,demod);
+
+%% Frequency domain
+f = (-N/2:N/2-1)*(fs/N);
+VSB_spec = fftshift(abs(fft(vsb_sig))/N);
+DEM_spec = fftshift(abs(fft(demod))/N);
+
+%% Plotting (2 columns × 3 rows)
+figure;
+
+subplot(3,2,1);
+plot(t,m,'r');
+title('Message Signal');
+grid on;
+
+subplot(3,2,2);
+plot(t,vsb_sig,'r');
+title('VSB Signal');
+grid on;
+
+subplot(3,2,3);
+plot(f,VSB_spec,'r');
+title('VSB Spectrum');
+xlim([-2000 2000]);
+grid on;
+
+subplot(3,2,4);
+plot(t,demod,'r');
+title('Demodulated Signal');
+grid on;
+
+subplot(3,2,5);
+plot(f,DEM_spec,'r');
+title('Demodulated Spectrum');
+xlim([-500 500]);
+grid on;
+
+subplot(3,2,6);
+axis off;
+text(0.1,0.5,'VSB Modulation & Demodulation','FontSize',10);
